@@ -83,7 +83,8 @@ public class XxlJobAutoRegister implements ApplicationListener<ApplicationReadyE
                 Method executeMethod = methodXxlJobEntry.getKey();
                 XxlJob xxlJob = methodXxlJobEntry.getValue();
 
-                //自动注册
+                // 自动注册
+                // 带有XxlJob注解的方法上同时也有XxlRegister注解，进行是否注册判断逻辑
                 if (executeMethod.isAnnotationPresent(XxlRegister.class)) {
                     XxlRegister xxlRegister = executeMethod.getAnnotation(XxlRegister.class);
                     List<XxlJobInfo> jobInfo = jobInfoService.getJobInfo(xxlJobGroup.getId(), xxlJob.value());
@@ -93,9 +94,10 @@ public class XxlJobAutoRegister implements ApplicationListener<ApplicationReadyE
                                 .filter(xxlJobInfo -> xxlJobInfo.getExecutorHandler().equals(xxlJob.value()))
                                 .findFirst();
                         if (first.isPresent())
+                            // jobHandler已经存在，跳过
                             continue;
                     }
-
+                    // jobHandler不存在，执行注册
                     XxlJobInfo xxlJobInfo = createXxlJobInfo(xxlJobGroup, xxlJob, xxlRegister);
                     Integer jobInfoId = jobInfoService.addJobInfo(xxlJobInfo);
                 }
